@@ -22,6 +22,7 @@ import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
  
 public class testProject extends Application
 {
@@ -74,6 +75,8 @@ public class testProject extends Application
         Button pauseButton = new Button("Pause");
         Button volumeUpButton = new Button("<+");
         Button volumeDownButton = new Button("<-");
+        Button seekBackwardButton = new Button("-10s");
+        Button seekForwardButton = new Button("+10s");
          
         // Create the Event Handlers for the Button
         playButton.setOnAction(new EventHandler <ActionEvent>() 
@@ -117,9 +120,22 @@ public class testProject extends Application
         		player.setVolume(player.getVolume()-(player.getVolume()*0.1));
         	}
         });
-         
+        
+        seekBackwardButton.setOnAction(new EventHandler <ActionEvent>() {
+        	public void handle(ActionEvent event) {
+        		Duration newTime = player.getCurrentTime();
+        		player.seek(newTime.add(Duration.millis(10000).negate()));
+        	}
+        });
+        
+        seekForwardButton.setOnAction(new EventHandler <ActionEvent>() {
+        	public void handle(ActionEvent event) {
+        		Duration newTime = player.getCurrentTime();
+        		player.seek(newTime.add(Duration.millis(10000)));
+        	}
+        });
         // Create the HBox
-        HBox controlBox = new HBox(5, playButton, stopButton, pauseButton, volumeUpButton, volumeDownButton);
+        HBox controlBox = new HBox(5, playButton, stopButton, pauseButton, volumeUpButton, volumeDownButton,seekBackwardButton,seekForwardButton);
          
         // Create the VBox
         VBox root = new VBox(5,mediaView,controlBox);
