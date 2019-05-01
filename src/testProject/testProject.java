@@ -1,89 +1,132 @@
 package testProject;
 
-import java.awt.event.WindowListener;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 
-import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
+import javafx.scene.paint.Paint;
 import javafx.util.Duration;
- 
-public class testProject extends Application
-{
-    public static void main(String[] args) 
-    {
-        Application.launch(args);
-    }
-     
-    @Override
-    public void start(Stage stage) 
-    {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.showOpenDialog(null);
-    	
-        // Locate the media content in the CLASSPATH
-        URL mediaUrl = null;
-		try {
-			mediaUrl = fileChooser.getSelectedFile().toURI().toURL();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        String mediaStringUrl = mediaUrl.toExternalForm();
-         
-        // Create a Media
-        Media media = new Media(mediaStringUrl);
-         
-        // Create a Media Player
-        final MediaPlayer player = new MediaPlayer(media);
-        // Automatically begin the playback
-        player.setAutoPlay(true);
-         
-        // Create a 400X300 MediaView
-        MediaView mediaView = new MediaView(player);
-        mediaView.setFitWidth(400);
-        mediaView.setFitHeight(300);        
-        mediaView.setSmooth(true);
-         
-        // Create the DropShadow effect
-        DropShadow dropshadow = new DropShadow();
-        dropshadow.setOffsetY(5.0);
-        dropshadow.setOffsetX(5.0);
-        dropshadow.setColor(Color.WHITE);
- 
-        mediaView.setEffect(dropshadow);        
-         
-        // Create the Buttons
-        Button playButton = new Button("Play");
-        Button stopButton = new Button("Stop");
-        Button pauseButton = new Button("Pause");
-        Button volumeUpButton = new Button("<+");
-        Button volumeDownButton = new Button("<-");
-        Button seekBackwardButton = new Button("-10s");
-        Button seekForwardButton = new Button("+10s");
-         
-        // Create the Event Handlers for the Button
-        playButton.setOnAction(new EventHandler <ActionEvent>() 
-        {
-            public void handle(ActionEvent event) 
-            {
-                if (player.getStatus() == Status.PLAYING) 
+
+
+public class testProject {
+	
+	JFrame mainwindow;
+	JFXPanel mediapanel;
+	JFileChooser fc;
+	Dimension dim;
+	MediaPlayer player;
+	
+	public testProject() {
+		mainwindow = new JFrame();		
+		MediaView mediaview = new MediaView();
+		DropShadow dropshadow = new DropShadow();
+		dropshadow.setOffsetY(5.0);
+		dropshadow.setOffsetX(5.0);
+		dropshadow.setColor(Color.BLACK);
+		mediaview.setEffect(dropshadow);
+		
+		mediapanel = new JFXPanel();
+		Group g = new Group(mediaview);
+		Scene s = new Scene(g);
+		s.setFill(Paint.valueOf("TRANSPARENT"));
+		mediapanel.setScene(s);
+		
+		JPanel controlpanel = new JPanel();
+        JButton playButton = new JButton("Play");
+        JButton stopButton = new JButton("Stop");
+        JButton pauseButton = new JButton("Pause");
+        JButton volumeUpButton = new JButton("<+");
+        JButton volumeDownButton = new JButton("<-");
+        JButton seekBackwardButton = new JButton("-10s");
+        JButton seekForwardButton = new JButton("+10s");
+        
+        controlpanel.add(playButton);
+        controlpanel.add(stopButton);
+        controlpanel.add(pauseButton);
+        controlpanel.add(volumeUpButton);
+        controlpanel.add(volumeDownButton);
+        controlpanel.add(seekBackwardButton);
+        controlpanel.add(seekForwardButton);
+        
+        JMenuBar menubar = new JMenuBar();
+        JMenu menu = new JMenu("File");
+        JMenuItem openvideo = new JMenuItem("Open Video");
+        
+        menu.add(openvideo);
+        menubar.add(menu);
+        
+        mainwindow.add(mediapanel);
+        mainwindow.add(controlpanel, BorderLayout.SOUTH);
+        mainwindow.setJMenuBar(menubar);
+        
+        mainwindow.setSize(500,400);
+        
+		int w = mainwindow.getWidth(), h = mainwindow.getHeight();
+		dim = new Dimension(w, h);
+		mediapanel.setPreferredSize(dim);
+        mainwindow.setVisible(true);
+        
+        openvideo.addActionListener(new ActionListener() {
+        	
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent arg0) {
+				fc = new JFileChooser();
+        		fc.showOpenDialog(null);
+        		URL mediaURL = null;
+        		
+        		try {
+        			mediaURL = fc.getSelectedFile().toURI().toURL();
+        		}
+        		catch(MalformedURLException e1) {
+        			
+        		}
+				
+        		if(mediaURL != null) {
+        			String mediaStringURL = mediaURL.toExternalForm();
+        			Media media = new Media(mediaStringURL);
+        			player = new MediaPlayer(media);
+        			mediaview.setMediaPlayer(player);
+        			DoubleProperty mvw = mediaview.fitWidthProperty();
+        			DoubleProperty mvh = mediaview.fitHeightProperty();
+        			mvw.bind(Bindings.selectDouble(mediaview.sceneProperty(), "width"));
+        			mvh.bind(Bindings.selectDouble(mediaview.sceneProperty(), "height"));
+        			mediaview.setPreserveRatio(true);
+        		}
+			}
+        });
+        
+        playButton.addActionListener(new ActionListener() {
+            
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (player.getStatus() == Status.PLAYING) 
                 {
                     player.stop();
                     player.play();
@@ -92,82 +135,57 @@ public class testProject extends Application
                 {
                     player.play();
                 }
-            }
+				
+			}
         });     
  
-        stopButton.setOnAction(new EventHandler <ActionEvent>() 
-        {
-            public void handle(ActionEvent event) 
-            {
+        stopButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) { 
                 player.stop();
             }
         }); 
         
-        pauseButton.setOnAction(new EventHandler <ActionEvent>() {
-        	public void handle(ActionEvent event) {
+        pauseButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) {
         		player.pause();
         	}
         });
         
-        volumeUpButton.setOnAction(new EventHandler <ActionEvent>() {
-        	public void handle(ActionEvent event) {
+        volumeUpButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) {
         		player.setVolume(player.getVolume()+(player.getVolume()*0.1));
         	}
         });
         
-        volumeDownButton.setOnAction(new EventHandler <ActionEvent>() {
-        	public void handle(ActionEvent event) {
+        volumeDownButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) {
         		player.setVolume(player.getVolume()-(player.getVolume()*0.1));
         	}
         });
         
-        seekBackwardButton.setOnAction(new EventHandler <ActionEvent>() {
-        	public void handle(ActionEvent event) {
+        seekBackwardButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) {
         		Duration newTime = player.getCurrentTime();
         		player.seek(newTime.add(Duration.millis(10000).negate()));
         	}
         });
         
-        seekForwardButton.setOnAction(new EventHandler <ActionEvent>() {
-        	public void handle(ActionEvent event) {
+        seekForwardButton.addActionListener(new ActionListener() {
+        	@Override
+			public void actionPerformed(ActionEvent e) {
         		Duration newTime = player.getCurrentTime();
         		player.seek(newTime.add(Duration.millis(10000)));
         	}
         });
-        // Create the HBox
-        HBox controlBox = new HBox(5, playButton, stopButton, pauseButton, volumeUpButton, volumeDownButton,seekBackwardButton,seekForwardButton);
-         
-        // Create the VBox
-        VBox root = new VBox(5,mediaView,controlBox);
-         
-        // Set the Style-properties of the HBox
-        root.setStyle("-fx-padding: 10;" +
-                "-fx-border-style: solid inside;" +
-                "-fx-border-width: 2;" +
-                "-fx-border-insets: 5;" +
-                "-fx-border-radius: 5;" +
-                "-fx-border-color: blue;");
- 
-        // Create the Scene
-        Scene scene = new Scene(root);
-        
-        stage.iconifiedProperty().addListener(new ChangeListener<Boolean>() {
-        	public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
-        		player.pause();
-        	}
-        });
-        
-        stage.focusedProperty().addListener(new ChangeListener<Boolean>() {
-        	public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
-        		player.play();
-        	}
-        });
-        
-        // Add the scene to the Stage
-        stage.setScene(scene);
-        // Set the title of the Stage
-        stage.setTitle("Video Player");
-        // Display the Stage
-        stage.show();       
-    }   
+	}
+
+	public static void main(String[] args) {
+		new testProject();
+	}
+	
 }
